@@ -1,0 +1,52 @@
+---
+- name: Add ClickHouse GPG key.
+  rpm_key:
+    key: https://packages.clickhouse.com/rpm/stable/repodata/repomd.xml.key
+    state: present
+
+- name: Add ClickHouse repository.
+  template:
+    src: clickhouse.repo.j2
+    dest: /etc/yum.repos.d/clickhouse.repo
+    mode: 0644
+
+- name: Install ClickHouse packages
+  package:
+    name: >
+      {{
+        clickhouse_packages |
+        product([clickhouse_version | d('*')]) |
+        map('join', '-')
+      }}
+    state: present
+  register: clickhouse_packages_result
+  retries: 5
+  delay: 5
+  until: clickhouse_packages_result is success
+  when: clickhouse_setup == "full"
+  # Ignore not found package errors in check mode
+  failed_when: |
+    clickhouse_packages_result.failed and
+    (
+      not ansible_check_mode or
+      clickhouse_packages_result.msg | regex_search("^(no package(\(s\))? matching|no available installation candidate)", ignorecase=True) == None
+    )
+  changed_when: clickhouse_packages_result.changed or clickhouse_packages_result.failed
+
+- name: Install ClickHouse client package
+  package:
+    name: >
+      {{
+        clickhouse_packages |
+        select('in', ['clickhouse-client', 'clickhouse-common-static']) |
+        product([clickhouse_version | d('*')]) |
+        map('join', '-')
+      }}
+    state: present
+  register: clickhouse_packages_result
+  retries: 5
+  delay: 5
+  until: clickhouse_packages_result is success
+  when: clickhouse_setup == "client"
+  failed_when: clickhouse_packages_result.failed and (not ansible_check_mode or not clickhouse_packages_result.msg.startswith('No package matching'))
+  changed_when: clickhouse_packages_result.changed or clickhouse_packages_result.failed

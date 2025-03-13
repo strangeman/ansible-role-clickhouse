@@ -19,6 +19,10 @@ clickhouse_apt_repo_key: 8919F6BD2B48D754
 clickhouse_apt_keyserver: keyserver.ubuntu.com
 clickhouse_apt_repo_key_url: ""
 
+# Yum repository configuration variables
+clickhouse_stable_repo_enabled: '1'
+clickhouse_lts_repo_enabled: '0'
+
 clickhouse_packages:
   - clickhouse-server
   - clickhouse-common-static

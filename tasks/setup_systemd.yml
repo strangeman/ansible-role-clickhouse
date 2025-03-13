@@ -3,6 +3,7 @@
   systemd:
     name: clickhouse-server.service
     enabled: yes
+    state: started
   register: enable_service
   # Ignore non-existing service error in check mode
   failed_when: enable_service.failed and (not ansible_check_mode or not enable_service.msg.startswith("Could not find the requested service"))

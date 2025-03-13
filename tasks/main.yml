@@ -3,11 +3,17 @@
   import_tasks: pre_configure.yml
 
 # install ClickHouse from apt repository
-- name: Install clickhouse from apt repository
-  import_tasks: install_repo.yml
+- name: Install clickhouse from Debian apt repository
+  import_tasks: install_repo_Debian.yml
   tags:
     - clickhouse_install
-  when: clickhouse_binaries_base_url is not defined or clickhouse_binaries_base_url == None
+  when: (clickhouse_binaries_base_url is not defined or clickhouse_binaries_base_url == None) and ansible_os_family == 'Debian'
+
+- name: Install clickhouse from RedHat yum repository
+  import_tasks: install_repo_RedHat.yml
+  tags:
+    - clickhouse_install
+  when: (clickhouse_binaries_base_url is not defined or clickhouse_binaries_base_url == None) and ansible_os_family == 'RedHat'
 
 # install ClickHouse from url
 # useful when you need to install a specific version from official repository
@@ -15,7 +21,7 @@
   import_tasks: install_from_url.yml
   tags:
     - clickhouse_install
-  when: clickhouse_binaries_base_url and clickhouse_binaries_base_url != None
+  when: clickhouse_binaries_base_url and clickhouse_binaries_base_url != None and ansible_os_family == 'Debian'
 
 - name: Set up systemd for clickhouse
   import_tasks: setup_systemd.yml
