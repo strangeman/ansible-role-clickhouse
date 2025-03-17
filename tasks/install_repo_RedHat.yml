@@ -29,7 +29,7 @@
     clickhouse_packages_result.failed and
     (
       not ansible_check_mode or
-      clickhouse_packages_result.msg | regex_search("^(no package(\(s\))? matching|no available installation candidate)", ignorecase=True) == None
+      clickhouse_packages_result.msg | regex_search("^(no package(\(s\))? matching|^(no package(\(s\))? available|no available installation candidate)", ignorecase=True) == None
     )
   changed_when: clickhouse_packages_result.changed or clickhouse_packages_result.failed
 
